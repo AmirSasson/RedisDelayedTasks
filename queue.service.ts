@@ -1,7 +1,11 @@
 import redis from "redis";
 import RedisSMQ, * as rsmq from "rsmq";
 
-const client = redis.createClient();
+const client = redis.createClient({
+    retry_strategy(options) {
+        return Math.min(options.attempt * 100, 3000);
+    },
+});
 
 client.on("error", (error) => {
     console.error(error);
@@ -31,11 +35,16 @@ export class QueueService {
     }
     public async receiveMsg(): Promise<RedisSMQ.QueueMessage> {
         return new Promise(async (res, rej) => {
-            const msg: any = await this.queueManager.receiveMessageAsync({ qname: QUEUE_NAME, vt: 10 * 1000 });
-            if (msg.message) {
-                res(msg as RedisSMQ.QueueMessage);
-            } else {
-                rej("no messages");
+            try {
+                const msg: any = await this.queueManager.receiveMessageAsync({ qname: QUEUE_NAME, vt: 10 * 1000 });
+                if (msg.message) {
+                    res(msg as RedisSMQ.QueueMessage);
+                } else {
+                    rej("no messages");
+                }
+            } catch (error) {
+                console.error(error);
+                rej("connection error");
             }
 
         });
