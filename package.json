@@ -4,9 +4,13 @@
   "description": "",
   "main": "test1.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "./node_modules/.bin/tsc",
+    "start:web": "node ./api.js",
+    "start:worker": "node ./worker.js",
+    "start:local-client": "node ./client.js"
   },
-  "author": "",
+  "author": "Amir Sasson",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
@@ -15,6 +19,7 @@
     "rsmq": "^0.12.2"
   },
   "devDependencies": {
+    "typescript": "~3.9.2",
     "@types/express": "^4.17.6",
     "@types/redis": "^2.8.21"
   }

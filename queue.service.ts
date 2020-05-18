@@ -15,12 +15,16 @@ export class QueueService {
         this.queueManager = new rsmq.default({ client });
     }
     public async initialize(): Promise<any> {
-        try {
-            await this.queueManager.createQueueAsync({ qname: QUEUE_NAME });
-        } catch (error) {
-            console.error(error);
+        if (!this.hasInitialized) {
+            try {
+                await this.queueManager.createQueueAsync({ qname: QUEUE_NAME });
+            } catch (error) {
+                if (!error.name || error.name !== "queueExists") {
+                    console.error(error);
+                }
+            }
+            this.hasInitialized = true;
         }
-        this.hasInitialized = true;
     }
     public async sendMessage(msg: string, delay: number) {
         await this.queueManager.sendMessageAsync({ qname: QUEUE_NAME, message: JSON.stringify({ msg }), delay });
